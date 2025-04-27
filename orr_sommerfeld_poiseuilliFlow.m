@@ -96,11 +96,13 @@ xticks(0:20:100)
 
 %% Growth rate of most unstable mode - For loops
 N = 100;
-alphaVec = 0.1:0.01:1.5;
-ReVec = [10:5:100]*100;
+alphaVec = [0.1:0.01:1.5];
+ReVec = [10:1:100]*100 ;
 % ReVec = [10:15:100]*100;
 
 c = zeros(length(ReVec), length(alphaVec));
+%% Without parfor
+tic
 for i = 1:length(ReVec)
     Re = ReVec(i);
     for j = 1:length(alphaVec)
@@ -113,8 +115,36 @@ for i = 1:length(ReVec)
         c(i, j) = lambda(1);
     end
 end
+elapsedTimeSingle = toc
+
+%% test with parfor in inside loop
+c2 = zeros(length(ReVec), length(alphaVec));
+
+[II, JJ] = ndgrid(1:length(ReVec), 1:length(alphaVec));
+II = II(:);
+JJ = JJ(:);
+ReVEC = repmat(ReVec, 1, length(alphaVec));
+AlphaVEC = repmat(alphaVec, length(ReVec), 1);
+tic
+parfor idx = 1:numel(II)
+    % i = II(idx);
+    % j = JJ(idx);
+    
+    Re = ReVEC(idx);
+    alpha = AlphaVEC(idx);
+    [~, lambda] = orrSommerfeld(N, alpha,Re, poiseuilliFlow);
+    [~,pos] = sort(imag(lambda), 'descend');
+    lambda = lambda(pos);
+    
+    % Get the most unstable mode
+    c2(idx) = lambda(1);
+
+end
+elapsedTimePar = toc
+
+
 %% Growth rate of most unstable mode - Plot
-omega_i = repmat(alphaVec, length(ReVec), 1).*imag(c);
+omega_i = repmat(alphaVec, length(ReVec), 1).*imag(c2);
 colors = {'k', 'b', 'r','k:','b:'};
 figure
 hold on
@@ -147,24 +177,24 @@ ylabel('\alpha')
 xticks([2e3:2e3:10e3])
 
 %% Neutral Curve
-pos = find(round(omega_i', 3) == 0);
-RePlot = X(pos);
-alphaPlot = Y(pos);
-[~, pos] = sort(RePlot);
-alphaPlot = alphaPlot(pos);
-RePlot = RePlot(pos);
-
-% [~, pos] = unique(RePlot);
-% alphaPlot = alphaPlot(pos);
-% RePlot = RePlot(pos);
+pos = find(round(omega_i', 4) == 0);
+Recr = min(X(pos));
 
 figure
-plot(RePlot, alphaPlot, 'Color',[0 0 0 0.5])
+contourf(X, Y, omega_i',[0 0], 'LineStyle','-','LineWidth',1.5, ...
+    'FaceColor','none','color',[.5 .5 .5])
 
+xline(Recr, 'LineWidth',1.5, 'Color','b', 'LineStyle',':')
+axis tight 
+shading interp
+
+
+title('Neutral Curve (\omega_i = 0)')
 xlabel('Re')
 ylabel('\alpha')
 xlim([1000, 10000])
-ylim([0.2, 1.4])
+
+
 %% plot eigenmodes
 
 figure;
