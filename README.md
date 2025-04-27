@@ -1,2 +1,2 @@
 # flow-instability
-Building a toolbox to solve some canonical problems in fluid mechanics field
+Building a toolbox to solve some fluid mechanics canonical stability problems for the Instability and Transition to Turbulence Course (AA-277).
