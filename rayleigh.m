@@ -1,6 +1,8 @@
 close all; clear all;
 clc
 
+path(path, 'src')
+
 %% grid and derivatives
 N = 200; % number of gridpoints
 [D,y]=cheb(N-1);
