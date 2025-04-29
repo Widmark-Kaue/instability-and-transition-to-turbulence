@@ -5,48 +5,26 @@ path(path, 'src')
 
 %% grid and derivatives
 N = 200; % number of gridpoints
-[D,y]=cheb(N-1);
-D2 = D*D;
-
-% Stretche domain from [-1:1] to [-H:H]
-H = 20;
-y = y*H;
-D2 = D2/(H^2);
 
 %% Constants
-alpha = 0.25;
-alpha2 =  alpha^2*eye(size(D2));
-% U = 0.5*(1+tanh(y));
-U = 0.5*(1+tanh(y/2));
+H = 20; % Stretche domain from [-1:1] to [-H:H]
+alpha = 0.3;
+mixingLayerFlow = @(y) 0.5*(1+tanh(y/2));
 
-% U = (1+tanh(y));
+%% Solve Rayleigh equation
+[V, lambda, ~, ~, y, D, D2] = rayleigh(N, alpha, mixingLayerFlow, H);
+
+[~, pos] = sort(imag(lambda), 'descend');
+lambda = lambda(pos);
+V = V(:, pos);
 
 %% Plot U velocity field
 figure
+U = mixingLayerFlow(y);
 plot(U, y, 'k');
 % ylim([-2,2])
 xlabel('U')
 ylabel('y')
-%% set eigenvalue problem
-L = diag(U)*(D2 - alpha2) - diag(D2*U) ;
-F = D2 - alpha2;
-
-%% set boundary conditions v=0 at both ends
-L(1,:) = 0; L(1,1) = 1; F(1,:) = 0;
-L(N,:) = 0; L(N,N) = 1; F(N,:) = 0;
-
-%% solve eigenvalue problem
-[V,lambda]=eig(L, F);
-lambda = diag(lambda);
-
-%% sort eigenvalues and eigenfunctions
-% lambda=sort(lambda);
-[~,pos]=sort(imag(lambda), 'descend');
-lambda = lambda(pos);
-V = V(:,pos);
-% absV = abs(V);
-% angleV = angle(V);
-
 
 %% Plot EigenSpectrum
 figure
@@ -67,6 +45,8 @@ ylabel('c_i')
 j = 1;
 figure
 semilogy(y, abs(V(:, j)), 'k')
+% plot(y, abs(V(:, j)), 'k')
+
 
 xlabel('y')
 title('Eigenfunction number 1')
@@ -78,7 +58,7 @@ waveLength = 2*pi/alpha;
 dx = waveLength/64;
 x = 0:dx:waveLength;
 [X, Y] = meshgrid(x, y);
-Vy = V(:, j)*1e-1;
+Vy = V(:, j)*1e-2;
 
 vxy = @(t) Vy*exp(1i*alpha*(x - c*t));
 dvxydx = @(t) 1i*alpha*vxy(t);
@@ -92,7 +72,8 @@ vorticity_BaseFLow = repmat(-D*U, 1, length(x));
 
 vorticity = @(t) real(vorticity_K_H(t)) + vorticity_BaseFLow;
 %% Contour only for K-H 
-contourf(X, Y, real(vorticity_K_H(0)), 100, 'LineStyle','-')
+figure
+contourf(X, Y, real(vorticity_K_H(0)), 60, 'LineStyle','-')
 % % contourf(X, Y, vorticity_BaseFLow, 100, 'LineStyle','none')
 %% Countour Velocity fields
 t = 0;

@@ -1,4 +1,4 @@
-function [V,lambda, L, F] = orrSommerfeld(N,alpha, Re, baseFlow)
+function [V,lambda, L, F, y, D, D4] = orrSommerfeld(N,alpha, Re, baseFlow)
 % Solve Orr-Sommerfeld eigenvalue problem for a specific base flow 
 
 [D, D2, D4, y] = dirichletNeumannBCs(N);
