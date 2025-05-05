@@ -1,16 +1,9 @@
 ### My files
 *.zip
 *.mat
-Resultados/
-SignalProcessing/
-
-#Sheets and Binaries
-Codes/*xlsx
-Codes/*.mat
 
 # directorys
-Test_files/
-images/
+images*/
 
 ### MATLAB
 # Windows default autosave extension

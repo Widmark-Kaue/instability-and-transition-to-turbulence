@@ -7,7 +7,7 @@ path(path, 'src')
 N = 200; % number of gridpoints
 
 %% Constants
-H = 20; % Stretche domain from [-1:1] to [-H:H]
+H = 1; % Stretche domain from [-1:1] to [-H:H]
 alpha = 0.3;
 mixingLayerFlow = @(y) 0.5*(1+tanh(y/2));
 

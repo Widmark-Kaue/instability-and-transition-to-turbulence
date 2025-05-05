@@ -1,11 +1,13 @@
-clear all; close all;
+clear all; 
+% close all;
 
 refL = 1; %% reference length, 1 for delta, 2 for delta*
 
-set(0,'DefaultLineLinewidth',2);
-set(0,'DefaultAxesFontSize',16);
+% set(0,'DefaultLineLinewidth',2);
+% set(0,'DefaultAxesFontSize',16);
 
 global beta
+path(path, 'src')
 
 %% grid
 N = 100; % degree of highest Chebyshev polynomial
@@ -18,7 +20,7 @@ H = 20; y = (y+1)*H; D = D/H;
 delta = 1.;
 fact = 1./delta * 5.;
 
-beta = 0.0; % Falkner-Skan; 
+beta = 0.1; % Falkner-Skan; 
 % put beta=0 for Blasius
 % put beta>0 for favourable pressure gradient
 % put beta<0 for adverse pressure gradient
@@ -45,6 +47,11 @@ Dold = D; D2old = D*D;
 dU = D*U;
 ddU = D*D*U;
 
+figure;
+plot(U,y,dU,y,ddU,y);
+ylabel('y/\delta'); legend('U','U''','U''''');grid on;
+title(['\beta = ', num2str(beta)])
+
 %% derivative operators
 [D,y]=cheb(N);
 D2 = D*D; D2 = D2(2:N,2:N);
@@ -63,3 +70,4 @@ D = D/fact;D2=D2/fact^2; D4=D4/fact^4;
 figure;
 plot(U,y,dU,y,ddU,y);
 ylabel('y/\delta'); legend('U','U''','U''''');grid on;
+title(['\beta = ', num2str(beta)])

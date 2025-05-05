@@ -194,7 +194,27 @@ xlabel('Re')
 ylabel('\alpha')
 xlim([1000, 10000])
 
+%% Tollmien-Schlichting mode
+pos = find(ReVec == 7000);
 
+
+figure('Position',[100 100 900 400])
+subplot(1, 2, 1)
+hold on
+plot(alphaVec,real(c2(pos, :)), 'b', 'DisplayName','Re = 7000');
+hold off
+xlabel('\alpha')
+ylabel('c_r')
+legend
+
+subplot(1, 2,2)
+hold on
+plot(alphaVec,omega_i(pos, :), 'b', 'DisplayName','Re = 7000');
+yline(0, 'k', 'HandleVisibility','off')
+hold off
+xlabel('\alpha')
+ylabel('\omega_i')
+legend
 %% plot eigenmodes
 
 figure;
