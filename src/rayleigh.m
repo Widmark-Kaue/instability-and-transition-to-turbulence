@@ -1,21 +1,38 @@
-function [V,lambda, L, F, y, D, D2] = rayleigh(N,alpha, baseFlow, H)
+function [V,lambda, L, F, y, D, D2] = rayleigh(N,alpha, baseFlow, H, h)
 %Solve Rayleigh eigenvalue problem for a specific base flow 
 
 % grid and derivatives
-[D,y]=cheb(N);
+[D,y]=cheb(N-1);
 D2 = D*D;
 
 % Stretche domain from [-1:1] to [-H:H]
-if nargin < 4
-    H = 1;
+switch nargin
+    case 3
+        H = 1;
+        h = 0;
+    case 4
+        h = 0;
 end
-y = y*H;
+y = (y+h)*H;
 D = D/H;
 D2 = D2/(H^2);
 
+% Apply boundary conditions v = 0 at both ends
+% y = y(2:N+1);
+% D = D(2:N+1, 2:N+1);
+% D2 = D2(2:N+1, 2:N+1);
+
+
 % Constants
 alpha2 =  alpha^2*eye(size(D2));
-U = baseFlow(y);
+U = baseFlow;
+if isa(baseFlow, 'function_handle')
+    U = baseFlow(y);
+end
+
+
+    
+
 
 % set eigenvalue problem
 L = diag(U)*(D2 - alpha2) - diag(D2*U) ;
