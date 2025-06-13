@@ -274,30 +274,66 @@ xlabel('c_r')
 ylabel('c_i')
 legend('Location','best')
 
-save_fig(fig, 'eigenspectrum_alpha1_jetFlow.eps')
+% save_fig(fig, 'eigenspectrum_alpha1_jetFlow.eps')
 
 %% d) Eigenfunctions of Unstable modes
+u_th1_mode1 = 1i*D*V_th1(:, 1)/alpha;
+u_th1_mode2 = 1i*D*V_th1(:, 2)/alpha;
+u_th2_mode1 = 1i*D*V_th2(:, 1)/alpha;
+u_th2_mode2 = 1i*D*V_th2(:, 2)/alpha;
 
-figure('Position', [150, 150, 1000, 400])
-subplot(1,2,1)
+
+fig = figure('Position', [150, 150, 1000, 500]);
+subplot(2,2,1)
 hold on
-semilogy(y, abs(V_th1(:, 1)), 'b', 'LineWidth',Lwth,'DisplayName', th1Label)
-semilogy(y, abs(V_th2(:, 1)), 'k', 'LineWidth',Lwth, 'DisplayName', th2Label)
+plot(y, abs(V_th1(:, 1)), 'b', 'LineWidth',Lwth,'DisplayName', th1Label)
+plot(y, abs(V_th2(:, 1)), 'k', 'LineWidth',Lwth, 'DisplayName', th2Label)
 hold off
 xlabel('y')
-ylabel('V(y)')
+ylabel('v')
 title('1st Mode')
+ylim([0, 1])
 grid on
-legend()
+box on
 
 
-subplot(1, 2,2)
+subplot(2, 2,2)
 hold on
-semilogy(y, abs(V_th1(:, 2)), 'b', 'LineWidth',Lwth,'DisplayName', th1Label)
-semilogy(y, abs(V_th2(:, 2)), 'k', 'LineWidth',Lwth,'DisplayName', th2Label)
+plot(y, abs(V_th1(:, 2)), 'b', 'LineWidth',Lwth,'DisplayName', th1Label)
+plot(y, abs(V_th2(:, 2)), 'k', 'LineWidth',Lwth,'DisplayName', th2Label)
 hold off
 xlabel('y')
-ylabel('V(y)')
+ylabel('v')
 title('2nd Mode')
+ylim([0, 1])
 grid on
+box on
+legend('Location','south')
 
+
+subplot(2, 2,3)
+hold on
+plot(y, abs(u_th1_mode1), 'b', 'LineWidth',Lwth,'DisplayName', th1Label)
+plot(y, abs(u_th2_mode1), 'k', 'LineWidth',Lwth,'DisplayName', th2Label)
+hold off
+xlabel('y')
+ylabel('u')
+title('1st Mode')
+ylim([0, 15])
+grid on
+box on
+% legend('Location','south')
+
+subplot(2, 2,4)
+hold on
+plot(y, abs(u_th1_mode2), 'b', 'LineWidth',Lwth,'DisplayName', th1Label)
+plot(y, abs(u_th2_mode2), 'k', 'LineWidth',Lwth,'DisplayName', th2Label)
+hold off
+xlabel('y')
+ylabel('u')
+title('2nd Mode')
+ylim([0, 15])
+grid on
+box on
+
+save_fig(fig, 'eigenfunctions_jet_flow_alpha1.eps')

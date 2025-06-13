@@ -20,7 +20,7 @@ Lwth = 1;
 % global beta
 %% Constants 
 alphaVec = [0.1:0.01:1.5];
-ReVec = [10:1:100]*100 ;
+ReVec = [10:1:50]*100 ;
 alpha = 1;
 Re = 4500;
 
@@ -216,13 +216,16 @@ box on
 legend
 save_fig(fig, 'Falkner_Skan_eigenspectrum_variable_alpha.eps')
 
-%% b) Eigenspectrum with viscous effects
+%% Velocity for Viscou effects
+N = 300;
+alphaVec = [0.1:0.1:1.5];
+ReVec = [10:1:50]*100 ;
 [~,y] = cheb(N);
 y = (y+h)*H;
 
 U1_visc = falknerSkan_b1(y);
 U2_visc = falknerSkan_b2(y);
-
+%% b) Eigenspectrum with viscous effects
 [~, lambda1] =  rayleigh(N, alpha, U1, fact1, h);
 
 [~, lambda2] =  rayleigh(N, alpha, U2, fact2, h);
@@ -334,9 +337,16 @@ box on
 save_fig(fig, 'Falkner_Skan_grid_Convergence_alpha1_Re4500.eps')
 
 %% Compute parallel 
-parpool('local', 4);
+% parpool('local', 4);
 disp(' -> Starting Parallel: ')
+N = 150;
+alphaVec = [0.1:0.01:1.5];
+ReVec = [3:1:50]*100 ;
+[~,y] = cheb(N);
+y = (y+h)*H;
 
+U1_visc = falknerSkan_b1(y);
+U2_visc = falknerSkan_b2(y);
 c_b1 = zeros(length(ReVec), length(alphaVec));
 c_b2 = zeros(length(ReVec), length(alphaVec));
 
@@ -370,45 +380,105 @@ parfor idx = 1:numel(II)
 
 end
 elapsedTimePar = toc
-%% Countor plot
-omega_i = repmat(alphaVec, length(ReVec), 1).*imag(c2);
-vec = linspace(-4e-3,4e-3, 10);
+
+%% Compute single 
+% parpool('local', 4);
+disp(' -> Starting Single: ')
+N = 150;
+alphaVec = [0.1:0.05:1.5];
+ReVec = [10:1:50]*100 ;
+[~,y] = cheb(N);
+y = (y+h)*H;
+
+U1_visc = falknerSkan_b1(y);
+U2_visc = falknerSkan_b2(y);
+
+c_b1 = zeros(length(ReVec), length(alphaVec));
+c_b2 = zeros(length(ReVec), length(alphaVec));
+
+[II, JJ] = ndgrid(1:length(ReVec), 1:length(alphaVec));
+II = II(:);
+JJ = JJ(:);
+ReVEC = repmat(ReVec, 1, length(alphaVec));
+AlphaVEC = repmat(alphaVec, length(ReVec), 1);
+
+tic
+for idx = 1:numel(II)
+    Re = ReVEC(idx);
+    alpha = AlphaVEC(idx);
+    
+
+    [~, lambda1_visc] =  orrSommerfeld(N, alpha, Re, U1_visc(2:N), fact1, h);
+    [~, pos] =  sort(imag(lambda1_visc), 'descend');
+    lambda1_visc = lambda1_visc(pos);
+
+    [~, lambda2_visc] =  orrSommerfeld(N, alpha, Re, U2_visc(2:N), fact2, h);
+    [~, pos] =  sort(imag(lambda2_visc), 'descend');
+    lambda2_visc = lambda2_visc(pos);
+    
+    % [~, lambda] = orrSommerfeld(N, alpha,Re, baseFlow);
+    % [~,pos] = sort(imag(lambda), 'descend');
+    % lambda = lambda(pos);
+    
+    % Get the most unstable mode
+    c_b1(idx) = lambda1_visc(1);
+    c_b2(idx) = lambda2_visc(1);
+
+end
+elapsedTimePar = toc
+
+%% Omega_i
+omega_i_b1 = repmat(alphaVec, length(ReVec), 1).*imag(c_b1);
+omega_i_b2 = repmat(alphaVec, length(ReVec), 1).*imag(c_b2);
+
 [X, Y] = meshgrid(ReVec, alphaVec);
-figure
-contourf(X, Y, omega_i',vec, 'LineStyle','-')
-colormap('jet')
-c = colorbar;
-caxis([-4e-3 4e-3])
-c.Label.String = '\omega_i';
 
-axis tight 
-shading interp
-
-xlabel('Re')
-ylabel('\alpha')
-xticks([2e3:2e3:10e3])
 %% b) Neutral Curve
-omega_i = repmat(alphaVec, length(ReVec), 1).*imag(c2);
 
-pos = find(round(omega_i', 4) == 0);
-Recr = min(X(pos));
+% pos = find(round(omega_i', 4) == 0);
+% Recr = min(X(pos));
 
-fig = figure;
-contourf(X, Y, omega_i',[0 0], 'LineStyle','-','LineWidth',1.5, ...
-    'FaceColor','none','color',[.5 .5 .5])
-
+fig = figure('Position', [100, 100, 800, 300]);
+subplot(1, 2, 1)
+hold on
+Cneutral = contourf(X, Y, omega_i_b1',[0 0], 'LineStyle','-','LineWidth',1.5, ...
+    'FaceColor','none','color',[.5 .5 .5]);
+Recr = min(Cneutral(1,2:end));
 xline(Recr, 'LineWidth',1.5, 'Color','k', 'LineStyle','--')
 axis tight 
 shading interp
 
-text(Recr-250,0.5, ['Re_{cr} = ', num2str(Recr)], ...
+text(Recr-250,0.5, ['Re_{cr} = ', num2str(int32(Recr))], ...
     'Rotation', 90, ...
     'FontWeight','bold', ...
-    'FontSize',11)
-% title('Neutral Curve (\omega_i = 0)')
+    'FontSize',9)
+title([b1Label])
 xlabel('Re')
 ylabel('\alpha')
-xlim([1000, 10000])
+xlim([50, 5000])
+box on
 % xticks(ReVec(1:10:end))
 
-save_fig(fig, 'neutra_curve_poiseuille.eps')
+subplot(1, 2,2)
+hold on
+Cneutral = contourf(X, Y, omega_i_b2',[0 0], 'LineStyle','-','LineWidth',1.5, ...
+    'FaceColor','none','color',[.5 .5 .5]);
+
+Recr = min(Cneutral(1,2:end));
+xline(Recr, 'LineWidth',1.5, 'Color','k', 'LineStyle','--')
+hold off
+axis tight 
+shading interp
+
+text(Recr-250,0.5, ['Re_{cr} = ', num2str(int32(Recr))], ...
+    'Rotation', 90, ...
+    'FontWeight','bold', ...
+    'FontSize',9)
+title([ b2Label])
+xlabel('Re')
+ylabel('\alpha')
+xlim([50, 5000])
+box on
+% xticks(ReVec(1:10:end))
+
+save_fig(fig, 'neutra_curve_Falkner_Skan.eps')
