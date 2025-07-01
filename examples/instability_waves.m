@@ -1,8 +1,8 @@
 clear all; close all;
 
 %% plot parameters
-set(0,'DefaultLineLinewidth',2);
-set(0,'DefaultAxesFontSize',12);
+% set(0,'DefaultLineLinewidth',2);
+% set(0,'DefaultAxesFontSize',12);
 
 %% wave parameters
 

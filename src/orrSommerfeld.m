@@ -1,5 +1,7 @@
 function [V,lambda, L, F, y, D, D4] = orrSommerfeld(N,alpha, Re, baseFlow, H, h)
-% Solve Orr-Sommerfeld eigenvalue problem for a specific base flow 
+% TEMPORAL STABILITY
+% Solve Orr-Sommerfeld eigenvalue problem for a specific
+% base flow 
 
 switch nargin
     case 4
